@@ -15,10 +15,27 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
   if (url === "/message") {
-    fs.writeFileSync("message.txt", "message....");
+    const body = [];
+    req.on("data", (chunk) => {
+      body.push(chunk);
+    });
+    /*     req.on("end", () => {
+      const parsedbody = Buffer.concat(body).toString("utf-8");
+      const message = parsedbody.split("=")[1];
+      fs.writeFileSync("message.txt", message);
+    });
     res.setHeader("Location", "/");
     res.statusCode = 302;
-    return res.end();
+    return res.end(); */
+    req.on("end", () => {
+      const parsedbody = Buffer.concat(body).toString();
+      const message = parsedbody.split("=")[1];
+      fs.writeFile("message.txt", message, (error) => {
+        res.setHeader("Location", "/");
+        res.statusCode = 302;
+        return res.end();
+      });
+    });
   }
 });
 
